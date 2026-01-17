@@ -1,0 +1,156 @@
+// DevPulse Localization - Japanese (ja)
+// 日本語翻訳
+
+import { LocaleStrings } from './en';
+
+export const ja: LocaleStrings = {
+  // 共通
+  common: {
+    save: '保存',
+    cancel: 'キャンセル',
+    close: '閉じる',
+    add: '追加',
+    loading: '読み込み中...',
+    saving: '保存中...',
+    validating: '検証中...',
+    error: 'エラー',
+    success: '成功',
+    required: '必須',
+    optional: '任意',
+    enable: '有効',
+    disable: '無効',
+    edit: '編集',
+    delete: '削除',
+    image: '画像',
+    video: '動画',
+  },
+
+  // 認証
+  auth: {
+    signIn: 'Google でログイン',
+    signOut: 'ログアウト',
+    signingIn: 'ログイン中...',
+    domainRestriction: '⚠️ @google.com メールのみアクセス可能',
+    authError: '認証に失敗しました',
+    notAuthenticated: 'ユーザーが認証されていません',
+  },
+
+  // 設定
+  settings: {
+    title: '⚙️ 設定',
+    description: 'DevPulse を使用するための API キーを設定してください。キーは安全に保存され、アカウントに紐付けられます。',
+    geminiApiKey: '🔑 Gemini API キー',
+    geminiHint: '取得先：',
+    geminiLinkText: 'Google AI Studio',
+    twitterBearerToken: '🐦 Twitter トークン',
+    twitterHint: '取得先：',
+    twitterHintSuffix: 'このトークンがないと Twitter ソースは無効になります。',
+    twitterLinkText: 'Twitter 開発者ポータル',
+    savedSuccess: '✅ 設定を保存しました！',
+    saveError: '設定の保存に失敗しました',
+    geminiInvalid: 'Gemini：無効な API キー',
+    geminiValidationError: 'Gemini：検証に失敗しました',
+    twitterInvalid: 'Twitter：無効なトークン',
+    twitterValidationError: 'Twitter：検証に失敗しました',
+    language: '言語',
+  },
+
+  // サイドバー
+  sidebar: {
+    timeWindow: '期間',
+    sources: 'ソース',
+    addSource: 'ソースを追加',
+    editSource: 'ソースを編集',
+    newSource: '新規ソース',
+    noSources: 'ソースがありません',
+    noSourcesHint: '+ をクリックして追加してください',
+    enableAll: 'すべて有効',
+    syncSources: '同期',
+    syncing: '同期中...',
+    feedNamePlaceholder: 'フィード名',
+    feedUrlPlaceholder: '@ユーザー名または URL',
+    typeTwitter: 'Twitter/X',
+    typeRss: 'RSS フィード',
+    typeBlog: 'ブログ（スクレイピング）',
+    howItWorks: '使い方',
+    howStep1: 'ソースからデータを同期',
+    howStep2: '興味のある更新を選択',
+    howStep3: 'バイラルなスレッドを生成',
+    showOnlyThis: 'このソースのみ表示',
+    editSource2: 'ソースを編集',
+    removeSource: 'ソースを削除',
+  },
+
+  // フィードパネル
+  feed: {
+    loadedItems: '件を読み込み',
+    markIrrelevant: '関係なしとしてマーク',
+    noItems: 'まだアイテムがありません',
+    noItemsHint: 'ソースを同期してコンテンツを表示',
+    selectToGenerate: 'アイテムを選択してスレッド生成をクリック',
+    hideUsedItems: '使用済みを非表示',
+    minutesAgo: '分前',
+    hoursAgo: '時間前',
+    alsoIn: 'その他：',
+  },
+
+  // スレッドパネル
+  thread: {
+    title: 'スレッドジェネレーター',
+    noThread: 'スレッドがまだ生成されていません',
+    selectItems: 'フィードからアイテムを選択して生成をクリック',
+    generateThread: '✨ スレッドを生成',
+    generating: '生成中...',
+    generatingViral: '最適化スレッドを作成中...',
+    generatingHint: 'コンテンツを分析し最適化されたツイートを作成中',
+    regenerate: '再生成',
+    copyToClipboard: 'コピー',
+    copied: 'コピーしました！',
+    tweet: 'ツイート',
+    addMedia: 'メディアを追加',
+    generatingImage: '画像を生成中...',
+    generatingVideo: '動画を生成中...',
+    generatingVideoMinutes: '動画を生成中（数分かかる場合があります）...',
+    generatingVideoProgress: '動画を生成中...',
+    videoSuccess: '動画の生成に成功しました！',
+    startingVideo: '動画生成を開始中...',
+    urlContext: '追加 URL（コンテキスト用）',
+    urlPlaceholder: 'URL をここに貼り付け（1行に1つ）',
+    urlHint: '追加 URL はスレッドを充実させるために使用されます',
+    regenerateMedia: 'メディアを再生成',
+    generate: '生成',
+  },
+
+  // メディア
+  media: {
+    generatingImage: '画像を生成中...',
+    generatingVideo: '動画を生成中...',
+  },
+
+  // エラー
+  errors: {
+    geminiKeyRequired: 'Gemini API キーが設定されていません。⚙️ 設定で設定してください。',
+    twitterTokenRequired: 'Twitter トークンが設定されていません。⚙️ 設定で設定してください。',
+    networkError: 'ネットワークエラー。接続を確認してください。',
+    unknownError: '予期しないエラーが発生しました。',
+  },
+
+  // ヘッダー
+  header: {
+    poweredBy: 'Gemini 3.0 Flash 搭載',
+    settings: '設定',
+  },
+
+  // ログイン
+  login: {
+    welcome: 'ようこそ',
+    appName: 'DevPulse',
+    tagline: 'コンテンツをバイラルな Twitter スレッドに変換',
+    feature1Title: 'マルチソース',
+    feature1Desc: 'Twitter、RSS、ブログを集約',
+    feature2Title: 'AI パワード',
+    feature2Desc: 'Gemini 3 でスレッドを生成',
+    feature3Title: 'ビジュアルメディア',
+    feature3Desc: 'AI で画像と動画を作成',
+  },
+};

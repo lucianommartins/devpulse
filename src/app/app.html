@@ -1,0 +1,53 @@
+@if (authService.isLoading()) {
+<div class="app-loading">
+  <div class="loading-spinner"></div>
+  <p>{{ i18n.t.common.loading }}</p>
+</div>
+} @else if (!authService.isAuthenticated()) {
+<app-login></app-login>
+} @else {
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <span class="logo">💡</span>
+      <h1 class="app-title">DevPulse</h1>
+    </div>
+    <div class="header-right">
+      <div class="header-badge">
+        <span class="badge-icon">✨</span>
+        <span>{{ i18n.t.header.poweredBy }}</span>
+      </div>
+      @if (authService.currentUser(); as user) {
+      <div class="user-menu">
+        <button class="settings-btn" (click)="showSettings.set(true)" [title]="i18n.t.header.settings">
+          ⚙️
+        </button>
+        @if (user.photoURL) {
+        <img class="user-avatar" [src]="user.photoURL" [alt]="user.displayName || 'User'" />
+        } @else {
+        <div class="user-avatar-placeholder">{{ user.displayName?.charAt(0) || 'U' }}</div>
+        }
+        <button class="btn btn-ghost btn-sm logout-btn" (click)="authService.signOut()">
+          {{ i18n.t.auth.signOut }}
+        </button>
+      </div>
+      }
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <app-sidebar [style.width.px]="sidebarWidth()" (openSettings)="showSettings.set(true)"></app-sidebar>
+    <div class="resize-handle" (mousedown)="startResize($event, 'left')"></div>
+    <app-feed-dashboard></app-feed-dashboard>
+    <div class="resize-handle" (mousedown)="startResize($event, 'right')"></div>
+    <app-thread-panel [style.width.px]="threadPanelWidth()"></app-thread-panel>
+  </main>
+</div>
+
+<!-- Settings Modal -->
+@if (showSettings()) {
+<app-settings (close)="showSettings.set(false)"></app-settings>
+}
+}

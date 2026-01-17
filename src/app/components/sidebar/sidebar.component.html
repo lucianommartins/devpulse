@@ -1,0 +1,114 @@
+<aside class="sidebar">
+  <!-- Time Window Slider -->
+  <section class="sidebar-section">
+    <h3 class="section-title">{{ i18n.t.sidebar.timeWindow }}</h3>
+    <div class="time-slider-container">
+      <input type="range" class="time-slider" [min]="1" [max]="168" [value]="timeWindow()"
+        (input)="onTimeWindowChange($event)" />
+      <span class="time-value">{{ getTimeWindowLabel() }}</span>
+    </div>
+  </section>
+
+  <!-- Sources List -->
+  <section class="sidebar-section sources-section">
+    <!-- Type Filters -->
+    <div class="type-filters">
+      <button class="type-filter-btn" [class.active]="feedService.isTypeEnabled('twitter')"
+        (click)="feedService.toggleType('twitter')" title="Toggle Twitter/X">
+        𝕏
+      </button>
+      <button class="type-filter-btn" [class.active]="feedService.isTypeEnabled('rss')"
+        (click)="feedService.toggleType('rss')" title="Toggle RSS">
+        📡
+      </button>
+      <button class="type-filter-btn" [class.active]="feedService.isTypeEnabled('blog')"
+        (click)="feedService.toggleType('blog')" title="Toggle Blog">
+        📝
+      </button>
+    </div>
+
+    <div class="section-header">
+      <h3 class="section-title">{{ i18n.t.sidebar.sources }}</h3>
+      <button class="btn-add" (click)="openAddForm()" [title]="i18n.t.sidebar.addSource">
+        <span>+</span>
+      </button>
+    </div>
+
+    <!-- Add/Edit Feed Form -->
+    @if (showAddForm()) {
+    <div class="add-form animate-fadeIn">
+      <h4 class="form-title">{{ editingFeedId() ? i18n.t.sidebar.editSource : i18n.t.sidebar.newSource }}</h4>
+      <input type="text" class="input" [placeholder]="i18n.t.sidebar.feedNamePlaceholder" [value]="newFeedName()"
+        (input)="newFeedName.set($any($event.target).value)" />
+      <input type="text" class="input" [placeholder]="i18n.t.sidebar.feedUrlPlaceholder" [value]="newFeedUrl()"
+        (input)="newFeedUrl.set($any($event.target).value)" />
+      <select class="input" [value]="newFeedType()" (change)="newFeedType.set($any($event.target).value)">
+        @if (userSettings.hasTwitterBearerToken()) {
+        <option value="twitter">{{ i18n.t.sidebar.typeTwitter }}</option>
+        }
+        <option value="rss">{{ i18n.t.sidebar.typeRss }}</option>
+        <option value="blog">{{ i18n.t.sidebar.typeBlog }}</option>
+      </select>
+      <div class="form-actions">
+        <button class="btn btn-secondary" (click)="cancelAddForm()">{{ i18n.t.common.cancel }}</button>
+        <button class="btn btn-primary" (click)="saveFeed()">{{ editingFeedId() ? i18n.t.common.save : 'Add' }}</button>
+      </div>
+    </div>
+    }
+
+    <!-- Feed List -->
+    <div class="feeds-list">
+      <button class="btn-enable-all" (click)="feedService.enableAllFeeds()" [title]="i18n.t.sidebar.enableAll">
+        {{ i18n.t.sidebar.enableAll }}
+      </button>
+      @if (feeds().length === 0) {
+      <div class="empty-feeds">
+        <p>{{ i18n.t.sidebar.noSources }}</p>
+        <p class="hint">{{ i18n.t.sidebar.noSourcesHint }}</p>
+      </div>
+      }
+      @for (feed of feeds(); track feed.id) {
+      <div class="feed-item" [class.disabled]="!feed.enabled">
+        <span class="feed-icon" [class]="getFeedIconClass(feed.type)">
+          {{ getFeedIcon(feed.type) }}
+        </span>
+        <span class="feed-name solo-trigger" (click)="soloFeed(feed.id)" title="Show only this source">
+          {{ feed.name }}
+        </span>
+        <span class="feed-type-badge">{{ feed.type === 'twitter' ? 'X' : feed.type.toUpperCase() }}</span>
+        <button class="feed-toggle" [class.active]="feed.enabled" (click)="toggleFeed(feed.id)"
+          [title]="feed.enabled ? 'Disable' : 'Enable'">
+          <span class="toggle-dot"></span>
+        </button>
+        <button class="btn-edit" (click)="editFeed(feed)" title="Edit source">
+          ✏️
+        </button>
+        <button class="btn-delete" (click)="removeFeed(feed.id)" title="Remove source">
+          ×
+        </button>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- Sync Button -->
+  <button class="btn btn-primary btn-full sync-button" (click)="onSync()" [disabled]="isLoading()">
+    @if (isLoading()) {
+    <span class="spinner"></span>
+    <span>{{ i18n.t.sidebar.syncing }}</span>
+    } @else {
+    <span class="sync-icon">🔄</span>
+    <span>{{ i18n.t.sidebar.syncSources }}</span>
+    }
+  </button>
+
+  <!-- How it Works -->
+  <section class="how-it-works">
+    <h4 class="how-title">{{ i18n.t.sidebar.howItWorks }}</h4>
+    <ul class="how-list">
+      <li>{{ i18n.t.sidebar.howStep1 }}</li>
+      <li>{{ i18n.t.sidebar.howStep2 }}</li>
+      <li>{{ i18n.t.sidebar.howStep3 }}</li>
+    </ul>
+  </section>
+</aside>

@@ -1,0 +1,156 @@
+// DevPulse Localization - Latin American Spanish (es)
+// Traducciones naturales para español latinoamericano
+
+import { LocaleStrings } from './en';
+
+export const es: LocaleStrings = {
+  // Común
+  common: {
+    save: 'Guardar',
+    cancel: 'Cancelar',
+    close: 'Cerrar',
+    add: 'Agregar',
+    loading: 'Cargando...',
+    saving: 'Guardando...',
+    validating: 'Validando...',
+    error: 'Error',
+    success: 'Éxito',
+    required: 'obligatorio',
+    optional: 'opcional',
+    enable: 'Activar',
+    disable: 'Desactivar',
+    edit: 'Editar',
+    delete: 'Eliminar',
+    image: 'Imagen',
+    video: 'Video',
+  },
+
+  // Autenticación
+  auth: {
+    signIn: 'Iniciar sesión con Google',
+    signOut: 'Cerrar sesión',
+    signingIn: 'Iniciando sesión...',
+    domainRestriction: '⚠️ Acceso restringido a correos @google.com',
+    authError: 'Error de autenticación',
+    notAuthenticated: 'Usuario no autenticado',
+  },
+
+  // Configuración
+  settings: {
+    title: '⚙️ Configuración',
+    description: 'Configura tus claves de API para usar DevPulse. Las claves se almacenan de forma segura y están vinculadas a tu cuenta.',
+    geminiApiKey: '🔑 Clave de API Gemini',
+    geminiHint: 'Obtener en',
+    geminiLinkText: 'Google AI Studio',
+    twitterBearerToken: '🐦 Token de Twitter',
+    twitterHint: 'Obtener en',
+    twitterHintSuffix: '. Sin este token, las fuentes de Twitter estarán deshabilitadas.',
+    twitterLinkText: 'Portal de Desarrolladores de Twitter',
+    savedSuccess: '✅ ¡Configuración guardada!',
+    saveError: 'Error al guardar configuración',
+    geminiInvalid: 'Gemini: Clave de API inválida',
+    geminiValidationError: 'Gemini: Error de validación',
+    twitterInvalid: 'Twitter: Token inválido',
+    twitterValidationError: 'Twitter: Error de validación',
+    language: 'Idioma',
+  },
+
+  // Barra Lateral
+  sidebar: {
+    timeWindow: 'PERÍODO',
+    sources: 'FUENTES',
+    addSource: 'Agregar fuente',
+    editSource: 'Editar Fuente',
+    newSource: 'Nueva Fuente',
+    noSources: 'No hay fuentes agregadas.',
+    noSourcesHint: 'Haz clic en + para agregar una.',
+    enableAll: 'Activar todas',
+    syncSources: 'Sincronizar',
+    syncing: 'Sincronizando...',
+    feedNamePlaceholder: 'Nombre del feed',
+    feedUrlPlaceholder: '@usuario o URL',
+    typeTwitter: 'Twitter/X',
+    typeRss: 'Feed RSS',
+    typeBlog: 'Blog (scraping)',
+    howItWorks: 'Cómo funciona',
+    howStep1: 'Sincroniza datos de tus fuentes',
+    howStep2: 'Selecciona las actualizaciones interesantes',
+    howStep3: 'Genera un hilo optimizado para interacción',
+    showOnlyThis: 'Mostrar solo esta fuente',
+    editSource2: 'Editar fuente',
+    removeSource: 'Eliminar fuente',
+  },
+
+  // Panel de Feed
+  feed: {
+    loadedItems: 'elementos cargados',
+    markIrrelevant: 'Marcar como irrelevante',
+    noItems: 'Sin elementos aún',
+    noItemsHint: 'Sincroniza tus fuentes para ver contenido aquí.',
+    selectToGenerate: 'Selecciona elementos y haz clic en Generar Hilo',
+    hideUsedItems: 'Ocultar elementos usados',
+    minutesAgo: 'min atrás',
+    hoursAgo: 'h atrás',
+    alsoIn: 'También en:',
+  },
+
+  // Panel de Hilo
+  thread: {
+    title: 'Generador de Hilos',
+    noThread: 'Ningún hilo generado',
+    selectItems: 'Selecciona elementos del feed y haz clic en Generar',
+    generateThread: '✨ Generar Hilo',
+    generating: 'Generando...',
+    generatingViral: 'Creando hilo optimizado...',
+    generatingHint: 'Analizando contenido y creando tweets optimizados',
+    regenerate: 'Regenerar',
+    copyToClipboard: 'Copiar',
+    copied: '¡Copiado!',
+    tweet: 'Tweet',
+    addMedia: 'Agregar multimedia',
+    generatingImage: 'Generando imagen...',
+    generatingVideo: 'Generando video...',
+    generatingVideoMinutes: 'Generando video (puede tardar unos minutos)...',
+    generatingVideoProgress: 'Generando video...',
+    videoSuccess: '¡Video generado con éxito!',
+    startingVideo: 'Iniciando generación del video...',
+    urlContext: 'URLs adicionales para contexto',
+    urlPlaceholder: 'Pega URLs aquí, una por línea',
+    urlHint: 'Las URLs adicionales se usarán para enriquecer el hilo',
+    regenerateMedia: 'Regenerar multimedia',
+    generate: 'Generar',
+  },
+
+  // Multimedia
+  media: {
+    generatingImage: 'Generando imagen...',
+    generatingVideo: 'Generando video...',
+  },
+
+  // Errores
+  errors: {
+    geminiKeyRequired: 'Clave de API Gemini no configurada. Configúrala en ⚙️ Configuración.',
+    twitterTokenRequired: 'Token de Twitter no configurado. Configúralo en ⚙️ Configuración.',
+    networkError: 'Error de conexión. Verifica tu internet.',
+    unknownError: 'Ocurrió un error inesperado.',
+  },
+
+  // Encabezado
+  header: {
+    poweredBy: 'Powered by Gemini 3.0 Flash',
+    settings: 'Configuración',
+  },
+
+  // Inicio de Sesión
+  login: {
+    welcome: 'Bienvenido a',
+    appName: 'DevPulse',
+    tagline: 'Transforma contenido en hilos atractivos para Twitter',
+    feature1Title: 'Multi-fuente',
+    feature1Desc: 'Agrega Twitter, RSS y blogs',
+    feature2Title: 'IA Avanzada',
+    feature2Desc: 'Genera hilos con Gemini 3',
+    feature3Title: 'Multimedia',
+    feature3Desc: 'Crea imágenes y videos con IA',
+  },
+};

@@ -1,0 +1,159 @@
+<div class="thread-panel">
+  <div class="panel-header">
+    <h2 class="panel-title">{{ i18n.t.thread.title }}</h2>
+  </div>
+
+  <div class="panel-content">
+    @if (isGenerating()) {
+    <div class="generating-state">
+      <div class="generating-spinner"></div>
+      <p>{{ i18n.t.thread.generatingViral }}</p>
+      <p class="generating-hint">{{ i18n.t.thread.generatingHint }}</p>
+    </div>
+    } @else if (error()) {
+    <div class="error-state">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error() }}</p>
+      <button class="btn btn-primary" (click)="generateThread()">Try again</button>
+    </div>
+    } @else if (thread()) {
+    <div class="thread-container">
+      <div class="thread-header">
+        <span class="tweet-count">{{ thread()!.tweets.length }} tweets</span>
+        <div class="thread-actions">
+          <button class="btn btn-secondary" (click)="copyThread()" [class.copied]="copiedIndex() === -1">
+            {{ copiedIndex() === -1 ? '✓ Copied!' : '📋 Copy all' }}
+          </button>
+          <button class="btn btn-ghost" (click)="clearThread()">
+            ✕ Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="tweets-list">
+        @for (tweet of thread()!.tweets; track tweet.index) {
+        <article class="tweet-card">
+          <div class="tweet-header">
+            <span class="tweet-number">{{ tweet.index }}/{{ thread()!.tweets.length }}</span>
+            <span class="char-count" [class]="getCharCountClass(getCharCount(tweet.content))">
+              {{ getCharCount(tweet.content) }}/280
+            </span>
+          </div>
+
+          <p class="tweet-content">{{ tweet.content }}</p>
+
+          @if (tweet.mediaPlaceholder) {
+          <div class="media-section">
+            <!-- Show generated media if available -->
+            @if (getGeneratedMedia(tweet.index); as media) {
+            <div class="generated-media">
+              @if (media.type === 'image') {
+              <img [src]="'data:' + media.mimeType + ';base64,' + media.data" alt="Generated image"
+                class="generated-image" />
+              } @else {
+              <video [src]="media.url" controls class="generated-video"></video>
+              }
+              <div class="media-actions">
+                <button class="btn btn-sm btn-secondary" (click)="downloadMedia(media, tweet.index)">
+                  ⬇️ Download
+                </button>
+                <button class="btn btn-sm btn-ghost" (click)="clearGeneratedMedia(tweet.index)"
+                  [title]="i18n.t.thread.regenerateMedia">
+                  🔄 {{ i18n.t.thread.regenerate }}
+                </button>
+              </div>
+            </div>
+            } @else {
+            <!-- Show placeholder and generate button -->
+            <div class="media-placeholder">
+              <div class="media-header">
+                <span class="media-icon">{{ getMediaIcon(tweet.mediaPlaceholder.type) }}</span>
+                <span class="media-type">{{ tweet.mediaPlaceholder.type === 'image' ? i18n.t.common.image :
+                  i18n.t.common.video }}</span>
+                <span class="media-tool">via {{ getToolLabel(tweet.mediaPlaceholder.tool) }}</span>
+                <button class="btn btn-ghost btn-xs" (click)="toggleEditPrompt(tweet.index)" title="Edit prompt">
+                  ✏️
+                </button>
+              </div>
+
+              @if (isEditingPrompt(tweet.index)) {
+              <textarea class="prompt-editor" [value]="getEditedPrompt(tweet.index) || tweet.mediaPlaceholder.prompt"
+                (input)="updateEditedPrompt(tweet.index, $event)" rows="3"></textarea>
+              <div class="prompt-editor-actions">
+                <button class="btn btn-ghost btn-xs" (click)="cancelEditPrompt(tweet.index)">{{ i18n.t.common.cancel
+                  }}</button>
+                <button class="btn btn-primary btn-xs" (click)="saveEditPrompt(tweet.index)">{{ i18n.t.common.save
+                  }}</button>
+              </div>
+              } @else {
+              <p class="media-prompt">
+                <strong>Prompt:</strong> {{ getEditedPrompt(tweet.index) || tweet.mediaPlaceholder.prompt }}
+              </p>
+              }
+
+              @if (isGeneratingMedia(tweet.index)) {
+              <div class="media-generating">
+                <div class="generating-spinner small"></div>
+                <span>{{ mediaProgress() }}</span>
+              </div>
+              } @else if (!isEditingPrompt(tweet.index)) {
+              <button class="btn btn-primary btn-sm" (click)="generateMedia(tweet)">
+                ✨ {{ i18n.t.thread.generate }} {{ tweet.mediaPlaceholder.type === 'image' ? i18n.t.common.image :
+                i18n.t.common.video }}
+              </button>
+              }
+            </div>
+            }
+          </div>
+          }
+
+          <div class="tweet-actions">
+            <button class="btn btn-ghost btn-sm" (click)="copyTweet(tweet)"
+              [class.copied]="copiedIndex() === tweet.index">
+              {{ copiedIndex() === tweet.index ? '✓' : '📋' }}
+            </button>
+            <button class="btn btn-ghost btn-sm" (click)="regenerateTweet(tweet.index)" title="Regenerate tweet">
+              🔄
+            </button>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+    } @else {
+    <div class="empty-state">
+      <div class="empty-icon">💬</div>
+      <h3>{{ i18n.t.thread.noThread }}</h3>
+      <p>{{ i18n.t.thread.selectItems }}</p>
+
+      @if (selectedCount() === 0) {
+      <p class="hint">{{ i18n.t.feed.selectToGenerate }}</p>
+      }
+    </div>
+    }
+  </div>
+
+  @if (!isGenerating() && !thread() && selectedCount() > 0) {
+  <div class="panel-footer">
+    <!-- Additional URLs section -->
+    <div class="url-context-section">
+      <button class="btn btn-ghost btn-sm" (click)="toggleUrlInput()">
+        🔗 {{ showUrlInput() ? 'Hide' : i18n.t.thread.urlContext }}
+      </button>
+
+      @if (showUrlInput()) {
+      <div class="url-input-container">
+        <textarea class="url-input" [value]="additionalUrls()" (input)="updateAdditionalUrls($event)"
+          [placeholder]="i18n.t.thread.urlPlaceholder" rows="3"></textarea>
+        <p class="url-hint">{{ i18n.t.thread.urlHint }}</p>
+      </div>
+      }
+    </div>
+
+    <button class="btn btn-primary btn-full generate-btn" (click)="generateThread()">
+      <span class="btn-icon">✨</span>
+      {{ i18n.t.thread.generateThread }} ({{ selectedCount() }} items selected)
+    </button>
+  </div>
+  }
+</div>
