@@ -215,6 +215,7 @@ export const es: LocaleStrings = {
     processing: 'Procesando contenido...',
     errorUrlNotAccessible: 'URL no accesible. Intenta con otro enlace.',
     errorNoInput: 'Proporciona una URL o imagen.',
-    errorGeneration: 'Error al generar contenido. Intenta de nuevo.',
+    errorGeneration: '&',
+    errorNoPlatform: 'Selecione ao menos uma plataforma.',
   },
 };

@@ -215,6 +215,7 @@ export const zh: LocaleStrings = {
     processing: '正在处理内容...',
     errorUrlNotAccessible: 'URL 无法访问。请尝试其他链接。',
     errorNoInput: '请提供 URL 或图片。',
-    errorGeneration: '生成失败。请重试。',
+    errorGeneration: '&',
+    errorNoPlatform: 'Selecione ao menos uma plataforma.',
   },
 };

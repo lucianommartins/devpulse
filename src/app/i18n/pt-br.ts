@@ -215,6 +215,7 @@ export const ptBR: LocaleStrings = {
     processing: 'Processando conteúdo...',
     errorUrlNotAccessible: 'URL não acessível. Tente outro link.',
     errorNoInput: 'Forneça uma URL ou imagem.',
-    errorGeneration: 'Falha ao gerar conteúdo. Tente novamente.',
+    errorGeneration: '&',
+    errorNoPlatform: 'Selecione ao menos uma plataforma.',
   },
 };

@@ -130,16 +130,36 @@
                   i18n.t.common.video }}</span>
                 <span class="media-tool">via {{ getToolLabel(tweet.mediaPlaceholder.tool) }}</span>
               </div>
-              <p class="media-prompt">
-                <strong>Prompt:</strong> {{ tweet.mediaPlaceholder.prompt }}
-              </p>
+<!-- Editable Prompt Section -->
+@if (isEditingPrompt(tweet.index)) {
+<div class="prompt-edit-container">
+  <textarea class="prompt-textarea" [value]="getEditedPrompt(tweet.index) || tweet.mediaPlaceholder.prompt"
+    (input)="updateEditedPrompt(tweet.index, $event)" rows="3"
+    placeholder="Describe the image/video you want..."></textarea>
+  <div class="prompt-actions">
+    <button class="btn btn-primary btn-sm" (click)="saveEditedPrompt(tweet.index)">
+      ✓ {{ i18n.t.common.save }}
+    </button>
+    <button class="btn btn-ghost btn-sm" (click)="cancelEditPrompt(tweet.index)">
+      ✕ {{ i18n.t.common.cancel }}
+    </button>
+  </div>
+</div>
+} @else {
+<div class="prompt-display" (click)="startEditPrompt(tweet.index, tweet.mediaPlaceholder.prompt)">
+                <p class="media-prompt">
+                  <strong>Prompt:</strong> {{ getEditedPrompt(tweet.index) || tweet.mediaPlaceholder.prompt }}
+                  </p>
+                <span class="edit-hint">✏️ {{ i18n.t.common.edit || 'Edit' }}</span>
+                </div>
+                }
 
               @if (isGeneratingMedia(tweet.index)) {
               <div class="media-generating">
                 <div class="generating-spinner small"></div>
                 <span>{{ mediaProgress() }}</span>
               </div>
-              } @else {
+              } @else if (!isEditingPrompt(tweet.index)) {
               <button class="btn btn-primary btn-sm" (click)="generateMedia(tweet)">
                 ✨ {{ i18n.t.content.generate }} {{ tweet.mediaPlaceholder.type === 'image' ? i18n.t.common.image :
                 i18n.t.common.video }}
@@ -363,6 +383,18 @@
         ⚠️ {{ adhocError() }}
       </div>
       }
+<!-- Platform Selection -->
+<div class="adhoc-field">
+  <label>🌐 {{ i18n.t.content.selectPlatforms || 'Select platforms' }}</label>
+  <div class="adhoc-platforms">
+    @for (platform of platformList; track platform) {
+    <label class="platform-checkbox">
+      <input type="checkbox" [checked]="platformSelection()[platform]" (change)="toggleAdhocPlatform(platform)" />
+      <span class="platform-label">{{ getPlatformIcon(platform) }} {{ getPlatformName(platform) }}</span>
+    </label>
+    }
+  </div>
+</div>
     </div>
 
     <div class="adhoc-modal-footer">

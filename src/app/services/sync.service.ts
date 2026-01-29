@@ -24,11 +24,13 @@ export class SyncService {
   private userSettings = inject(UserSettingsService);
   private logger = inject(LoggerService);
 
+  private readonly TIME_WINDOW_KEY = 'devpulse_timeWindow';
+
   // State
   items = signal<FeedItem[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
-  timeWindowHours = signal(48);
+  timeWindowHours = signal(this.loadPersistedTimeWindow());
 
   // Computed
   selectedItems = computed(() => this.items().filter(item => item.selected));
@@ -37,6 +39,22 @@ export class SyncService {
   constructor() {
     // Auto-load cached items on startup
     this.loadFromCache();
+  }
+
+  /**
+   * Load persisted time window from localStorage
+   */
+  private loadPersistedTimeWindow(): number {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('devpulse_timeWindow');
+      if (saved) {
+        const hours = parseInt(saved, 10);
+        if (!isNaN(hours) && hours > 0) {
+          return hours;
+        }
+      }
+    }
+    return 48; // Default: 2 days
   }
 
   /**
@@ -260,10 +278,16 @@ export class SyncService {
   }
 
   /**
-   * Set time window and refresh
+   * Set time window, persist, and refresh dashboard
    */
   setTimeWindow(hours: number): void {
     this.timeWindowHours.set(hours);
+    // Persist to localStorage
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(this.TIME_WINDOW_KEY, String(hours));
+    }
+    // Refresh dashboard with new time window
+    this.loadFromCache();
   }
 
   /**

@@ -141,9 +141,28 @@ app.post('/api/gemini/generate', async (req, res) => {
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  // Build request body
+  // Build request body - handle both string and multimodal array contents
+  let formattedContents;
+  if (typeof contents === 'string') {
+    // Simple text content
+    formattedContents = [{ parts: [{ text: contents }] }];
+  } else if (Array.isArray(contents)) {
+    // Multimodal content (text + images)
+    const parts = contents.map(item => {
+      if (item.text) {
+        return { text: item.text };
+      } else if (item.inline_data) {
+        return { inline_data: item.inline_data };
+      }
+      return item;
+    });
+    formattedContents = [{ parts }];
+  } else {
+    formattedContents = [{ parts: [{ text: String(contents) }] }];
+  }
+
   const requestBody = {
-    contents: [{ parts: [{ text: contents }] }],
+    contents: formattedContents,
     generationConfig: genConfig
   };
 
@@ -382,10 +401,4 @@ app.listen(PORT, () => {
   console.log(`🚀 DevPulse API Server running on http://localhost:${PORT}`);
   console.log(`📡 Twitter API proxy: http://localhost:${PORT}/api/twitter/*`);
   console.log(`🤖 Gemini API proxy: http://localhost:${PORT}/api/gemini/*`);
-  if (!TWITTER_BEARER_TOKEN) {
-    console.warn('⚠️  Warning: TWITTER_BEARER_TOKEN not set in .env');
-  }
-  if (!GEMINI_API_KEY) {
-    console.warn('⚠️  Warning: GEMINI_API_KEY not set in .env');
-  }
 });

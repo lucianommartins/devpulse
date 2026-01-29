@@ -236,6 +236,65 @@
   color: var(--color-text-primary);
 }
 
+/* Prompt Editing */
+.prompt-display {
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.prompt-display:hover {
+  background: var(--color-bg-secondary);
+}
+
+.prompt-display .media-prompt {
+  flex: 1;
+}
+
+.edit-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.prompt-display:hover .edit-hint {
+  opacity: 1;
+}
+
+.prompt-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.prompt-textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  resize: vertical;
+  min-height: 60px;
+}
+
+.prompt-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.prompt-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+}
 /* Tweet Actions */
 .tweet-actions {
   display: flex;
@@ -819,6 +878,29 @@
   font-size: var(--font-size-sm);
 }
 
+.adhoc-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.platform-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.platform-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+}
+
+.platform-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 .adhoc-modal-footer {
   display: flex;
   justify-content: flex-end;

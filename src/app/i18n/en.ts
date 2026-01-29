@@ -214,6 +214,7 @@ export const en = {
     errorUrlNotAccessible: 'URL not accessible. Try a different link.',
     errorNoInput: 'Please provide a URL or image.',
     errorGeneration: 'Failed to generate content. Please try again.',
+    errorNoPlatform: 'Select at least one platform.',
   },
 };
 

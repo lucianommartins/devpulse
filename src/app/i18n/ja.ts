@@ -215,6 +215,7 @@ export const ja: LocaleStrings = {
     processing: 'コンテンツを処理中...',
     errorUrlNotAccessible: 'URL にアクセスできません。別のリンクを試してください。',
     errorNoInput: 'URL または画像を入力してください。',
-    errorGeneration: '生成に失敗しました。もう一度お試しください。',
+    errorGeneration: '&',
+    errorNoPlatform: 'Selecione ao menos uma plataforma.',
   },
 };

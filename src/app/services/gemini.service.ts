@@ -180,20 +180,37 @@ Language: ${lang}
 `;
     }
 
-    prompt += `Create a Twitter thread with 3-5 tweets that:
+    prompt += `Create a Twitter thread with 4-6 tweets that:
 1. Starts with a hook that grabs attention
 2. Provides key insights or information
 3. Ends with a call to action or thought-provoking question
 4. Uses relevant emojis and hashtags
+5. **Media**: For each tweet where an image or video would be impactful, include a placeholder with a generation prompt.
 
 Format your response as a JSON object:
 {
   "tweets": [
-    { "index": 1, "content": "Tweet 1 text here (max 280 chars)" },
-    { "index": 2, "content": "Tweet 2 text here" }
+    {
+      "index": 1,
+      "content": "Tweet 1 text here (max 280 chars)",
+      "media": {
+        "type": "image",
+        "prompt": "Detailed prompt for image generation...",
+        "tool": "nanobanana"
+      }
+    },
+    {
+      "index": 2,
+      "content": "Tweet 2 text here",
+      "media": null
+    }
   ],
   "summary": "Brief summary of the content"
-}`;
+}
+
+For videos, use "type": "video" and "tool": "veo3".
+If no media, use "media": null.
+IMPORTANT: When generating media prompts, always use light theme. Include bright, colorful backgrounds for images and videos.`;
 
     try {
       // Build request body
@@ -265,7 +282,12 @@ Format your response as a JSON object:
               index: t.index,
               content: t.content,
               sourceIds: [],
-              hashtags: []
+              hashtags: [],
+              mediaPlaceholder: t.media ? {
+                type: t.media.type,
+                prompt: t.media.prompt,
+                tool: t.media.tool || 'nanobanana'
+              } : undefined
             })),
             sourceItems: [],
             generatedAt: new Date()
@@ -298,6 +320,139 @@ Format your response as a JSON object:
         throw error;
       }
 
+      throw new Error('GENERATION_FAILED');
+    }
+  }
+
+  /**
+   * Generate adhoc content for a specific platform (LinkedIn, Threads, Bluesky)
+   */
+  async generateFromAdhocForPlatform(
+    platform: 'linkedin' | 'threads' | 'bluesky',
+    url?: string,
+    imageBase64?: string
+  ): Promise<PlatformContent> {
+    if (!url && !imageBase64) {
+      throw new Error('NO_INPUT');
+    }
+
+    const lang = this.i18n.getLanguageForPrompt();
+    const platformNames: Record<string, string> = {
+      linkedin: 'LinkedIn',
+      threads: 'Threads',
+      bluesky: 'Bluesky'
+    };
+    const platformLimits: Record<string, number> = {
+      linkedin: 3000,
+      threads: 500,
+      bluesky: 300
+    };
+
+    const prompt = `You are a social media specialist. Create a ${platformNames[platform]} post based on the provided content.
+
+Language: ${lang}
+Character limit: ${platformLimits[platform]}
+
+${url ? `Analyze content from: ${url}` : ''}
+${imageBase64 ? 'Also analyze the provided image and incorporate its context.' : ''}
+
+Create 1-3 engaging posts optimized for ${platformNames[platform]} that:
+1. Use appropriate tone for the platform
+2. Include relevant hashtags
+3. Have a compelling hook
+4. Stay within character limits
+
+Format response as JSON:
+{
+  "posts": [
+    { "index": 1, "content": "Post content here" }
+  ]
+}`;
+
+    try {
+      const requestBody: any = {
+        apiKey: this.getApiKey(),
+        model: 'gemini-3-flash-preview',
+        config: {
+          temperature: 0.8,
+          topP: 0.95,
+          maxOutputTokens: 2048
+        }
+      };
+
+      if (imageBase64 && url) {
+        requestBody.contents = [
+          { text: prompt },
+          {
+            inline_data: {
+              mime_type: 'image/png',
+              data: imageBase64.replace(/^data:image\/\w+;base64,/, '')
+            }
+          }
+        ];
+        requestBody.tools = [{ url_context: {} }];
+      } else if (imageBase64) {
+        requestBody.contents = [
+          { text: prompt },
+          {
+            inline_data: {
+              mime_type: 'image/png',
+              data: imageBase64.replace(/^data:image\/\w+;base64,/, '')
+            }
+          }
+        ];
+      } else if (url) {
+        requestBody.contents = prompt;
+        requestBody.tools = [{ url_context: {} }];
+      }
+
+      const response = await this.http.post<GeminiResponse>(
+        `${this.API_BASE}/generate`,
+        requestBody
+      ).toPromise();
+
+      if (response?.error) {
+        if (response.error.message?.includes('URL') ||
+          response.error.message?.includes('fetch')) {
+          throw new Error('URL_NOT_ACCESSIBLE');
+        }
+        throw new Error(response.error.message || 'API error');
+      }
+
+      const text = response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      // Parse response
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          this.stats.incrementContentCreated();
+          return {
+            platform,
+            posts: parsed.posts.map((p: any) => ({
+              text: p.content || p.text
+            }))
+          };
+        }
+      } catch (parseError) {
+        this.logger.warn('GeminiService', 'Failed to parse JSON, extracting from text');
+      }
+
+      // Fallback
+      const lines = text.split('\n').filter(l => l.trim());
+      this.stats.incrementContentCreated();
+      return {
+        platform,
+        posts: lines.slice(0, 3).map((line) => ({
+          text: line.replace(/^\d+\.\s*/, '').trim()
+        }))
+      };
+
+    } catch (error: any) {
+      this.logger.error('GeminiService', `Error generating adhoc ${platform} content:`, error);
+      if (error.message === 'URL_NOT_ACCESSIBLE' || error.message === 'NO_INPUT') {
+        throw error;
+      }
       throw new Error('GENERATION_FAILED');
     }
   }

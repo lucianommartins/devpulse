@@ -248,6 +248,44 @@ export class ThreadPanelComponent {
     // This will show the placeholder again, allowing prompt editing
   }
 
+  // Enhanced prompt editing methods
+  startEditPrompt(index: number, currentPrompt: string): void {
+    this.editingPromptIndex.set(index);
+    if (!this.editedPrompts().has(index)) {
+      this.editedPrompts.update(map => {
+        const newMap = new Map(map);
+        newMap.set(index, currentPrompt);
+        return newMap;
+      });
+    }
+  }
+
+  saveEditedPrompt(index: number): void {
+    const editedPrompt = this.editedPrompts().get(index);
+    if (!editedPrompt || !this.thread()) return;
+
+    // Update the tweet's mediaPlaceholder prompt
+    this.thread.update(t => {
+      if (!t) return t;
+      return {
+        ...t,
+        tweets: t.tweets.map(tweet => {
+          if (tweet.index === index && tweet.mediaPlaceholder) {
+            return {
+              ...tweet,
+              mediaPlaceholder: {
+                ...tweet.mediaPlaceholder,
+                prompt: editedPrompt
+              }
+            };
+          }
+          return tweet;
+        })
+      };
+    });
+    this.editingPromptIndex.set(null);
+  }
+
   copyTweet(tweet: ThreadTweet): void {
     navigator.clipboard.writeText(tweet.content).then(() => {
       this.copiedIndex.set(tweet.index);
@@ -725,6 +763,13 @@ export class ThreadPanelComponent {
     reader.readAsDataURL(file);
   }
 
+  toggleAdhocPlatform(platform: Platform): void {
+    this.platformSelection.update(current => ({
+      ...current,
+      [platform]: !current[platform]
+    }));
+  }
+
   async generateAdhocContent(): Promise<void> {
     const url = this.adhocUrl().trim();
     const imageBase64 = this.adhocImageBase64();
@@ -734,18 +779,43 @@ export class ThreadPanelComponent {
       return;
     }
 
+    // Check if any platform is selected
+    const selectedPlatforms = this.getSelectedPlatforms();
+    if (selectedPlatforms.length === 0) {
+      this.adhocError.set(this.i18n.t.adhoc.errorNoPlatform || 'Select at least one platform');
+      return;
+    }
+
     this.adhocLoading.set(true);
     this.adhocError.set(null);
 
     try {
-      const result = await this.geminiService.generateFromAdhoc(
-        url || undefined,
-        imageBase64 || undefined
-      );
+      // Generate for Twitter first (it uses a different format)
+      if (this.platformSelection().twitter) {
+        const result = await this.geminiService.generateFromAdhoc(
+          url || undefined,
+          imageBase64 || undefined
+        );
+        this.thread.set(result);
+      }
 
-      // Set the thread and close modal
-      this.thread.set(result);
-      this.activePlatformTab.set('twitter');
+      // Generate for other platforms
+      for (const platform of selectedPlatforms) {
+        if (platform !== 'twitter') {
+          const content = await this.geminiService.generateFromAdhocForPlatform(
+            platform,
+            url || undefined,
+            imageBase64 || undefined
+          );
+          this.generatedContent.update(current => ({
+            ...current,
+            [platform]: content
+          }));
+        }
+      }
+
+      // Set active tab to first selected platform
+      this.activePlatformTab.set(selectedPlatforms[0]);
       this.closeAdhocModal();
 
     } catch (error: any) {
