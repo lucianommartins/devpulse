@@ -109,6 +109,9 @@ export class SyncService {
     const enabledFeeds = this.feedService.getEnabledFeeds();
     const hours = this.timeWindowHours();
 
+    this.logger.info('Sync', `Starting sync for ${enabledFeeds.length} feeds (window: ${hours}h)`);
+    enabledFeeds.forEach(f => this.logger.debug('Sync', `  - ${f.name} (${f.type}): ${f.url}`));
+
     try {
       const allItems: FeedItem[] = [];
 
@@ -119,11 +122,14 @@ export class SyncService {
 
       results.forEach((result, index) => {
         if (result.status === 'fulfilled') {
+          this.logger.debug('Sync', `${enabledFeeds[index].name}: ${result.value.length} items`);
           allItems.push(...result.value);
         } else {
-          console.warn(`Failed to fetch feed ${enabledFeeds[index].name}:`, result.reason);
+          this.logger.error('Sync', `Failed to fetch feed ${enabledFeeds[index].name}:`, result.reason);
         }
       });
+
+      this.logger.info('Sync', `Total items fetched: ${allItems.length}`);
 
       // Deduplicate items by URL or title+author
       const deduped = this.deduplicateItems(allItems);
@@ -134,6 +140,7 @@ export class SyncService {
       );
 
       this.items.set(deduped);
+      this.logger.info('Sync', `After dedup: ${deduped.length} items in dashboard`);
 
       // Update lastSync for all feeds
       enabledFeeds.forEach(feed => {
@@ -142,7 +149,7 @@ export class SyncService {
 
     } catch (err) {
       this.error.set('Erro ao sincronizar feeds. Tente novamente.');
-      console.error('Sync error:', err);
+      this.logger.error('Sync', 'Sync error:', err);
     } finally {
       this.isLoading.set(false);
     }

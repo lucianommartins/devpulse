@@ -30,7 +30,7 @@ DevPulse is a modern web application that aggregates content from multiple sourc
 | 📎 **Adhoc Content** | Generate threads from any URL or image with Gemini Vision |
 | 📺 **YouTube Support** | Fetches videos via RSS from channels using Channel ID |
 | 🖼️ **Media Assets Tab** | View and download original media extracted from feeds |
-| 🤖 **AI Thread Generation** | Gemini 3.0 Flash creates platform-optimized threads |
+| 🤖 **AI Thread Generation** | Gemini 3.5 Flash creates platform-optimized threads |
 | 🎨 **AI Media Generation** | Generate images (Nano Banana) and videos (Veo 3.1) |
 | 📱 **Mobile Responsive** | Adaptive interface for smartphone use |
 | 🐦 **Twitter Video Extraction** | Extracts high-quality MP4 via host-swap (pbs.twimg) |
@@ -83,7 +83,7 @@ graph TB
         Twitter["Twitter/X API v2"]
         YouTube["YouTube RSS<br/>Channel Feeds"]
         RSS["RSS Feeds<br/>(via CORS Proxy)"]
-        Gemini["Google Gemini API<br/>gemini-3.0-flash"]
+        Gemini["Google Gemini API<br/>gemini-3.5-flash"]
     end
 
     Components --> Services
@@ -110,7 +110,7 @@ graph TB
 | **Authentication** | Firebase Auth | Google OAuth 2.0 |
 | **Database** | Cloud Firestore | Encrypted settings |
 | **Backend** | Express.js | API proxy for CORS bypass |
-| **AI** | Gemini 3.0 Flash | Text generation |
+| **AI** | Gemini 3.5 Flash | Text generation |
 | **AI Image** | Nano Banana | AI image generation |
 | **AI Video** | Veo 3.1 | AI video generation |
 | **Encryption** | Web Crypto API | AES-256-GCM client-side |

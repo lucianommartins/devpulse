@@ -12,8 +12,8 @@ export class ScraperService {
   private cache = inject(CacheService);
   private logger = inject(LoggerService);
 
-  // Use a CORS proxy for fetching pages
-  private readonly CORS_PROXY = 'https://corsproxy.io/?';
+  // Use our own server proxy for CORS-free fetching
+  private readonly CORS_PROXY = '/api/proxy?url=';
 
   /**
    * Scrape a blog's listing page for article links, then fetch each article
@@ -26,16 +26,19 @@ export class ScraperService {
       const cachedItems = await this.getCachedItems(feed.id, startTime);
       const cachedUrls = new Set(cachedItems.map(item => item.url));
 
-      // Fetch the blog listing page
-      const pageUrl = encodeURIComponent(feed.url);
+      // Fetch the blog listing page via our proxy
+      this.logger.debug('Scraper', `Fetching blog: ${feed.url}`);
       const html = await this.http.get(
-        `${this.CORS_PROXY}${pageUrl}`,
+        `${this.CORS_PROXY}${encodeURIComponent(feed.url)}`,
         { responseType: 'text' }
       ).toPromise();
 
       if (!html) {
+        this.logger.warn('Scraper', `No HTML returned for ${feed.url}`);
         return cachedItems;
       }
+
+      this.logger.debug('Scraper', `Fetched ${html.length} bytes from ${feed.url}`);
 
       // Parse article links from the listing page
       const articleUrls = this.extractArticleLinks(html, feed.url);
@@ -79,6 +82,7 @@ export class ScraperService {
 
     // Find all links
     const anchors = doc.querySelectorAll('a[href]');
+    this.logger.debug('Scraper', `Total anchors found: ${anchors.length}`);
 
     for (const anchor of Array.from(anchors)) {
       let href = anchor.getAttribute('href') || '';
@@ -93,11 +97,7 @@ export class ScraperService {
       if (href.includes('/feed') || href.includes('/rss')) continue;
       if (href.includes('/about') || href.includes('/contact') || href.includes('/privacy')) continue;
 
-      // Skip if URL is too short (likely a category)
-      const pathParts = href.split('/').filter(p => p.length > 0);
-      if (pathParts.length < 3) continue;
-
-      // Make absolute URL
+      // Make absolute URL first (before any path checks)
       if (!href.startsWith('http')) {
         try {
           const base = new URL(baseUrl);
@@ -123,27 +123,36 @@ export class ScraperService {
       const url = new URL(href);
       const pathSegments = url.pathname.split('/').filter(p => p.length > 0);
 
-      // For blog.google, articles have 4+ segments like /technology/ai/google-gemini/gemini-article-title/
-      // Skip if too few segments (likely category page)
-      if (pathSegments.length < 3) continue;
-
       // Skip common non-article patterns
       const lastPart = pathSegments[pathSegments.length - 1] || '';
+      const lastPartClean = lastPart.replace(/\.html?$/i, ''); // Remove .html/.htm extension
+
       const skipPatterns = ['products', 'outreach', 'research', 'technology', 'ai', 'cloud',
         'developers', 'news', 'blog', 'articles', 'topics', 'about'];
-      if (skipPatterns.includes(lastPart.toLowerCase())) continue;
+      if (skipPatterns.includes(lastPartClean.toLowerCase())) continue;
 
-      // Accept URLs that have a slug-like last part (contains hyphens) or date pattern
-      const hasDatePattern = /\/20\d{2}\//.test(href);
-      const hasSlug = lastPart.includes('-') && lastPart.length > 10;
+      // Check for date pattern like /2025/01/ or /2026/01/
+      const hasDatePattern = /\/20\d{2}\/\d{2}\//.test(href);
 
-      if (hasDatePattern || hasSlug) {
+      // Check for slug (contains hyphens and is long enough)
+      const hasSlug = lastPartClean.includes('-') && lastPartClean.length > 8;
+
+      // Check for .html/.htm extension (common blog pattern)
+      const hasHtmlExtension = /\.html?$/i.test(lastPart);
+
+      // For date-pattern URLs (like /2026/01/slug.html), require at least 2 segments
+      // For other URLs, require at least 3 segments
+      const minSegments = hasDatePattern ? 2 : 3;
+      if (pathSegments.length < minSegments) continue;
+
+      // Accept URLs that have: date pattern, slug-like last part, or .html extension
+      if (hasDatePattern || hasSlug || hasHtmlExtension) {
         links.add(href);
+        this.logger.debug('Scraper', `Accepted article: ${href}`);
       }
     }
 
     this.logger.debug('Scraper', `Found ${links.size} article URLs from ${baseUrl}`);
-    this.logger.debug('Scraper', 'Article URLs:', Array.from(links));
     return Array.from(links);
   }
 
@@ -151,9 +160,8 @@ export class ScraperService {
    * Fetch and parse a single article page
    */
   private async fetchArticle(url: string, feed: Feed): Promise<FeedItem | null> {
-    const encodedUrl = encodeURIComponent(url);
     const html = await this.http.get(
-      `${this.CORS_PROXY}${encodedUrl}`,
+      `${this.CORS_PROXY}${encodeURIComponent(url)}`,
       { responseType: 'text' }
     ).toPromise();
 

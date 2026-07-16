@@ -183,7 +183,7 @@ export const en = {
 
   // Header
   header: {
-    poweredBy: 'Gemini 3.0 Flash Powered',
+    poweredBy: 'Gemini 3.5 Flash Powered',
     settings: 'Settings',
     contentCreated: 'Content created by all users',
     contentsGenerated: 'contents generated',

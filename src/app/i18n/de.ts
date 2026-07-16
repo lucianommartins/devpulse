@@ -185,7 +185,7 @@ export const de: LocaleStrings = {
 
   // Kopfzeile
   header: {
-    poweredBy: 'Powered by Gemini 3.0 Flash',
+    poweredBy: 'Powered by Gemini 3.5 Flash',
     settings: 'Einstellungen',
     contentCreated: 'Von allen Nutzern erstellte Inhalte',
     contentsGenerated: 'Inhalte generiert',

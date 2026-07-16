@@ -30,7 +30,7 @@ DevPulse é uma aplicação web moderna que agrega conteúdo de múltiplas fonte
 | 📎 **Conteúdo Adhoc** | Gere threads de qualquer URL ou imagem com Gemini Vision |
 | 📺 **Suporte YouTube** | Busca vídeos via RSS de canais usando Channel ID |
 | 🖼️ **Aba Media Assets** | Visualize e baixe mídia original extraída dos feeds |
-| 🤖 **Geração de Threads com IA** | Gemini 3.0 Flash cria threads otimizadas por plataforma |
+| 🤖 **Geração de Threads com IA** | Gemini 3.5 Flash cria threads otimizadas por plataforma |
 | 🎨 **Geração de Mídia com IA** | Gere imagens (Nano Banana) e vídeos (Veo 3.1) |
 | 📱 **Mobile Responsive** | Interface adaptativa para uso em smartphones |
 | 🐦 **Extração de Vídeo do Twitter** | Extrai MP4 de alta qualidade via host-swap (pbs.twimg) |
@@ -83,7 +83,7 @@ graph TB
         Twitter["Twitter/X API v2"]
         YouTube["YouTube RSS<br/>Channel Feeds"]
         RSS["RSS Feeds<br/>(via CORS Proxy)"]
-        Gemini["Google Gemini API<br/>gemini-3.0-flash"]
+        Gemini["Google Gemini API<br/>gemini-3.5-flash"]
     end
 
     Components --> Services
@@ -110,7 +110,7 @@ graph TB
 | **Autenticação** | Firebase Auth | Google OAuth 2.0 |
 | **Banco de Dados** | Cloud Firestore | Configurações criptografadas |
 | **Backend** | Express.js | Proxy API para bypass de CORS |
-| **IA** | Gemini 3.0 Flash | Geração de texto |
+| **IA** | Gemini 3.5 Flash | Geração de texto |
 | **IA Imagem** | Nano Banana | Geração de imagens com IA |
 | **IA Vídeo** | Veo 3.1 | Geração de vídeos com IA |
 | **Criptografia** | Web Crypto API | AES-256-GCM client-side |
@@ -367,7 +367,7 @@ Após fazer deploy no Cloud Run:
 
 ### Geração de Threads
 
-A geração de threads usa Gemini 3.0 Flash com injeção dinâmica de idioma:
+A geração de threads usa Gemini 3.5 Flash com injeção dinâmica de idioma:
 
 ```typescript
 // Prompt é construído com o idioma selecionado pelo usuário

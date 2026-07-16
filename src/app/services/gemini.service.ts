@@ -55,7 +55,7 @@ export class GeminiService {
   private async callGeminiApi(prompt: string, additionalUrls: string[] = [], options: { temperature?: number; maxTokens?: number } = {}): Promise<string> {
     const requestBody: any = {
       apiKey: this.getApiKey(),
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash',
       contents: prompt,
       config: {
         temperature: options.temperature ?? 0.8,
@@ -216,7 +216,7 @@ IMPORTANT: When generating media prompts, always use light theme. Include bright
       // Build request body
       const requestBody: any = {
         apiKey: this.getApiKey(),
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.5-flash',
         config: {
           temperature: 0.8,
           topP: 0.95,
@@ -372,7 +372,7 @@ Format response as JSON:
     try {
       const requestBody: any = {
         apiKey: this.getApiKey(),
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.5-flash',
         config: {
           temperature: 0.8,
           topP: 0.95,

@@ -43,8 +43,8 @@ export class YouTubeService {
       const cachedItems = await this.getCachedVideos(feed.id, startTime);
       const cachedIds = new Set(cachedItems.map(item => item.id));
 
-      // Fetch RSS feed via CORS proxy
-      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(feedUrl)}`;
+      // Fetch RSS feed via our local proxy (CORS-free)
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(feedUrl)}`;
       const response = await this.http.get(proxyUrl, { responseType: 'text' }).toPromise();
 
       if (!response) {

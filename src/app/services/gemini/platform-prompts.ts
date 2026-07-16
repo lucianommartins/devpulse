@@ -85,7 +85,15 @@ Respond EXACTLY in this JSON format:
 
 For videos, use "type": "video" and "tool": "veo3".
 If no media, use "media": null.
-IMPORTANT: When generating media prompts, always use light theme. Include bright, colorful backgrounds for images and videos.
+IMPORTANT — MEDIA PROMPT GUIDELINES:
+- Be CREATIVE and VARIED — never use the same visual style twice in a thread
+- Use VIBRANT, saturated color palettes: gradients, duotones, complementary colors — avoid monochrome or muted tones
+- Mix visual styles across posts: 3D renders, isometric illustrations, flat design, collage, pop art, paper craft, clay/plasticine, retro-futurism
+- Include dynamic elements: motion, particles, explosions of color, abstract shapes, playful characters or mascots
+- Reference high-quality visual styles: Google I/O keynote graphics, Kurzgesagt animations, Pixar-quality renders
+- Always use light/bright backgrounds — NO dark themes
+- Make prompts specific and descriptive (at least 2 sentences), not generic
+- For VIDEO prompts: absolutely NO on-screen text, NO narration, NO dialogue, NO speech — purely visual storytelling
 
 Generate the thread now:`;
 }
@@ -136,7 +144,15 @@ Respond EXACTLY in this JSON format:
 
 For videos, use "type": "video" and "tool": "veo3".
 If no media, use "media": null.
-IMPORTANT: When generating media prompts, always use light theme. Include bright, colorful backgrounds for images and videos.
+IMPORTANT — MEDIA PROMPT GUIDELINES:
+- Be CREATIVE and VARIED — never use the same visual style twice in a thread
+- Use VIBRANT, saturated color palettes: gradients, duotones, complementary colors — avoid monochrome or muted tones
+- Mix visual styles across posts: 3D renders, isometric illustrations, flat design, collage, pop art, paper craft, clay/plasticine, retro-futurism
+- Include dynamic elements: motion, particles, explosions of color, abstract shapes, playful characters or mascots
+- Reference high-quality visual styles: Google I/O keynote graphics, Kurzgesagt animations, Pixar-quality renders
+- Always use light/bright backgrounds — NO dark themes
+- Make prompts specific and descriptive (at least 2 sentences), not generic
+- For VIDEO prompts: absolutely NO on-screen text, NO narration, NO dialogue, NO speech — purely visual storytelling
 
 Generate the LinkedIn post now:`;
 }
@@ -189,7 +205,15 @@ Respond EXACTLY in this JSON format:
 
 For videos, use "type": "video" and "tool": "veo3".
 If no media, use "media": null.
-IMPORTANT: When generating media prompts, always use light theme. Include bright, colorful backgrounds for images and videos.
+IMPORTANT — MEDIA PROMPT GUIDELINES:
+- Be CREATIVE and VARIED — never use the same visual style twice in a thread
+- Use VIBRANT, saturated color palettes: gradients, duotones, complementary colors — avoid monochrome or muted tones
+- Mix visual styles across posts: 3D renders, isometric illustrations, flat design, collage, pop art, paper craft, clay/plasticine, retro-futurism
+- Include dynamic elements: motion, particles, explosions of color, abstract shapes, playful characters or mascots
+- Reference high-quality visual styles: Google I/O keynote graphics, Kurzgesagt animations, Pixar-quality renders
+- Always use light/bright backgrounds — NO dark themes
+- Make prompts specific and descriptive (at least 2 sentences), not generic
+- For VIDEO prompts: absolutely NO on-screen text, NO narration, NO dialogue, NO speech — purely visual storytelling
 
 Generate the Threads thread now:`;
 }
@@ -239,7 +263,15 @@ Respond EXACTLY in this JSON format:
 
 For videos, use "type": "video" and "tool": "veo3".
 If no media, use "media": null.
-IMPORTANT: When generating media prompts, always use light theme. Include bright, colorful backgrounds for images and videos.
+IMPORTANT — MEDIA PROMPT GUIDELINES:
+- Be CREATIVE and VARIED — never use the same visual style twice in a thread
+- Use VIBRANT, saturated color palettes: gradients, duotones, complementary colors — avoid monochrome or muted tones
+- Mix visual styles across posts: 3D renders, isometric illustrations, flat design, collage, pop art, paper craft, clay/plasticine, retro-futurism
+- Include dynamic elements: motion, particles, explosions of color, abstract shapes, playful characters or mascots
+- Reference high-quality visual styles: Google I/O keynote graphics, Kurzgesagt animations, Pixar-quality renders
+- Always use light/bright backgrounds — NO dark themes
+- Make prompts specific and descriptive (at least 2 sentences), not generic
+- For VIDEO prompts: absolutely NO on-screen text, NO narration, NO dialogue, NO speech — purely visual storytelling
 
 Generate the BlueSky thread now:`;
 }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Feed, FeedItem } from '../models/feed.model';
 import { CacheService } from './cache.service';
+import { LoggerService } from './logger.service';
 
 interface RSSItem {
   title?: string;
@@ -30,9 +31,10 @@ interface ParsedFeed {
 export class RssService {
   private http = inject(HttpClient);
   private cache = inject(CacheService);
+  private logger = inject(LoggerService);
 
   // Use a CORS proxy for RSS feeds
-  private readonly CORS_PROXY = 'https://corsproxy.io/?';
+  private readonly CORS_PROXY = '/api/proxy?url=';
 
   /**
    * Fetch RSS/Atom feed items within the time window
@@ -41,27 +43,49 @@ export class RssService {
     try {
       const startTime = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
 
+      // Direct console.log for guaranteed visibility
+      console.log(`%c[RSS] Fetching: ${feed.name} (${feed.url})`, 'color: #22c55e; font-weight: bold');
+      console.log(`[RSS] Time window: ${hoursAgo}h, since: ${startTime.toISOString()}`);
+
       // Fetch cached items first
       const cachedItems = await this.getCachedItems(feed.id, startTime);
       const cachedIds = new Set(cachedItems.map(item => item.id));
+      console.log(`[RSS] Cached items for ${feed.name}: ${cachedItems.length}`);
 
-      // Fetch feed from URL
+      // Fetch feed from URL with cache-busting
       const feedUrl = encodeURIComponent(feed.url);
+      const cacheBuster = Date.now();
+      const proxyUrl = `${this.CORS_PROXY}${feedUrl}&_cb=${cacheBuster}`;
+      console.log(`[RSS] Fetching URL: ${proxyUrl}`);
+
       const response = await this.http.get(
-        `${this.CORS_PROXY}${feedUrl}`,
-        { responseType: 'text' }
+        proxyUrl,
+        {
+          responseType: 'text',
+          headers: {
+            'Cache-Control': 'no-cache, no-store',
+            'Pragma': 'no-cache'
+          }
+        }
       ).toPromise();
 
       if (!response) {
+        console.warn(`[RSS] Empty response for: ${feed.name}`);
         return cachedItems;
       }
 
+      console.log(`[RSS] Response: ${response.length} bytes`);
+
       // Parse the feed
       const parsed = this.parseFeed(response);
+      console.log(`%c[RSS] Parsed ${parsed.items.length} raw items from ${feed.name}`, 'color: #3b82f6');
+
       const items = this.convertToFeedItems(parsed, feed, startTime);
+      console.log(`%c[RSS] After date filter: ${items.length} items within time window`, 'color: #f59e0b');
 
       // Filter out already cached items
       const newItems = items.filter(item => !cachedIds.has(item.id));
+      this.logger.debug('RSS', `New items (not cached): ${newItems.length}`);
 
       // For items without images, try to fetch from article page (in parallel, limited)
       const itemsNeedingImages = newItems.filter(item => !item.mediaUrls || item.mediaUrls.length === 0);
@@ -93,15 +117,32 @@ export class RssService {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, 'text/xml');
 
+    // Debug: Check for parse errors
+    const parseError = doc.querySelector('parsererror');
+    if (parseError) {
+      console.error('[RSS] XML Parse Error:', parseError.textContent?.substring(0, 200));
+      console.log('[RSS] Raw XML start:', xml.substring(0, 300));
+      return { title: '', items: [] };
+    }
+
     // Try RSS format first
     let items = Array.from(doc.querySelectorAll('item'));
+    console.log(`[RSS] Found ${items.length} 'item' elements with querySelectorAll`);
 
     // Try Atom format if no RSS items found
     if (items.length === 0) {
       items = Array.from(doc.querySelectorAll('entry'));
+      console.log(`[RSS] Fallback: Found ${items.length} 'entry' elements`);
+    }
+
+    // Last resort: try getElementsByTagName
+    if (items.length === 0) {
+      items = Array.from(doc.getElementsByTagName('item'));
+      console.log(`[RSS] Fallback getElementsByTagName: Found ${items.length} 'item' elements`);
     }
 
     const feedTitle = doc.querySelector('channel > title, feed > title')?.textContent || '';
+    console.log(`[RSS] Feed title: "${feedTitle}"`);
 
     return {
       title: feedTitle,
@@ -110,11 +151,24 @@ export class RssService {
   }
 
   private parseItem(item: Element): RSSItem {
-    const getContent = (selectors: string[]): string => {
-      for (const selector of selectors) {
-        const el = item.querySelector(selector);
-        if (el?.textContent) {
-          return el.textContent.trim();
+    // Use getElementsByTagName for more reliable XML element access
+    // querySelector can be unreliable with XML namespaces and case-sensitivity
+    const getContent = (tagNames: string[]): string => {
+      for (const tagName of tagNames) {
+        // First try querySelector (works for simple tags)
+        try {
+          const el = item.querySelector(tagName);
+          if (el?.textContent) {
+            return el.textContent.trim();
+          }
+        } catch (e) {
+          // querySelector may fail with special characters in XML
+        }
+
+        // Fallback to getElementsByTagName (more reliable for XML)
+        const elements = item.getElementsByTagName(tagName);
+        if (elements.length > 0 && elements[0].textContent) {
+          return elements[0].textContent.trim();
         }
       }
       return '';
@@ -150,7 +204,7 @@ export class RssService {
         urls.push(url);
       };
 
-    // Enclosure (standard RSS)
+      // Enclosure (standard RSS)
       const enclosure = item.querySelector('enclosure[url]');
       if (enclosure) {
         const type = enclosure.getAttribute('type') || '';
@@ -159,14 +213,21 @@ export class RssService {
         }
       }
 
-      // media:content
-      const mediaContent = item.querySelector('media\\:content[url], content[url]');
-      if (mediaContent) {
-        addUrl(mediaContent.getAttribute('url'));
+      // media:content - use getElementsByTagName for namespaced elements
+      const mediaContentElements = item.getElementsByTagName('media:content');
+      if (mediaContentElements.length > 0) {
+        addUrl(mediaContentElements[0].getAttribute('url'));
+      }
+
+      // Also try content[url] directly
+      const contentWithUrl = item.querySelector('content[url]');
+      if (contentWithUrl) {
+        addUrl(contentWithUrl.getAttribute('url'));
       }
 
       // Extract ALL images from content using regex
-      const content = getContent(['content\\:encoded', 'content', 'description']);
+      // Use the updated getContent that handles namespaces properly
+      const content = getContent(['content:encoded', 'content', 'description']);
 
       // Standard img tags
       const imgMatches = content.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
@@ -192,23 +253,30 @@ export class RssService {
     return {
       title: getContent(['title']),
       description: getContent(['description', 'summary']),
-      content: getContent(['content\\:encoded', 'content']),
+      content: getContent(['content:encoded', 'content']),
       link: getLink(),
-      pubDate: getContent(['pubDate', 'published', 'updated', 'dc\\:date']),
-      author: getContent(['author', 'dc\\:creator', 'creator']),
+      pubDate: getContent(['pubDate', 'published', 'updated', 'dc:date']),
+      author: getContent(['author', 'dc:creator', 'creator']),
       mediaUrls: getMediaUrls()
     };
   }
 
   private convertToFeedItems(parsed: ParsedFeed, feed: Feed, since: Date): FeedItem[] {
-    return parsed.items
+    let filteredCount = 0;
+    const result = parsed.items
       .map(item => {
         const pubDate = item.pubDate ? new Date(item.pubDate) : new Date();
 
+        this.logger.debug('RSS', `Item: "${item.title?.substring(0, 50)}" pubDate raw: "${item.pubDate}" parsed: ${pubDate.toISOString()}`);
+
         // Skip items older than the time window
         if (pubDate < since) {
+          filteredCount++;
+          this.logger.debug('RSS', `  -> FILTERED (too old): ${pubDate.toISOString()} < ${since.toISOString()}`);
           return null;
         }
+
+        this.logger.debug('RSS', `  -> ACCEPTED: within time window`);
 
         const content = item.content || item.description || '';
         // Strip HTML tags for display
@@ -229,6 +297,9 @@ export class RssService {
         } as FeedItem;
       })
       .filter((item): item is FeedItem => item !== null);
+
+    this.logger.info('RSS', `Filtered out ${filteredCount} items (too old), kept ${result.length}`);
+    return result;
   }
 
   private async getCachedItems(feedId: string, since: Date): Promise<FeedItem[]> {

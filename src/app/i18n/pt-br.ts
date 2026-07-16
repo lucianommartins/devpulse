@@ -185,7 +185,7 @@ export const ptBR: LocaleStrings = {
 
   // Cabeçalho
   header: {
-    poweredBy: 'Powered by Gemini 3.0 Flash',
+    poweredBy: 'Powered by Gemini 3.5 Flash',
     settings: 'Configurações',
     contentCreated: 'Conteúdos criados por todos os usuários',
     contentsGenerated: 'conteúdos gerados',

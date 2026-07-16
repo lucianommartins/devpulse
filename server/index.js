@@ -37,6 +37,79 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Generic CORS proxy for blog scraping
+app.get('/api/proxy', async (req, res) => {
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL parameter is required' });
+  }
+
+  // Helper function to fetch with meta-refresh handling
+  const fetchWithMetaRefresh = async (targetUrl, depth = 0) => {
+    // Prevent infinite redirect loops
+    if (depth > 3) {
+      throw new Error('Too many redirects');
+    }
+
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; DevPulse/1.0; +https://devpulse.app)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+      },
+      redirect: 'follow'  // Follow HTTP redirects
+    });
+
+    if (!response.ok) {
+      return { response, text: null };
+    }
+
+    const text = await response.text();
+
+    // Check for meta-refresh redirect
+    const metaRefreshMatch = text.match(/<meta[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*content\s*=\s*["']?\d+;\s*url=([^"'\s>]+)/i);
+    if (metaRefreshMatch && metaRefreshMatch[1]) {
+      let redirectUrl = metaRefreshMatch[1].trim();
+      // Handle relative URLs
+      if (redirectUrl.startsWith('/')) {
+        const urlObj = new URL(targetUrl);
+        redirectUrl = `${urlObj.origin}${redirectUrl}`;
+      } else if (!redirectUrl.startsWith('http')) {
+        const urlObj = new URL(targetUrl);
+        redirectUrl = new URL(redirectUrl, urlObj.href).href;
+      }
+      console.log(`[Proxy] Following meta-refresh redirect: ${redirectUrl}`);
+      return fetchWithMetaRefresh(redirectUrl, depth + 1);
+    }
+
+    return { response, text };
+  };
+
+  try {
+    const { response, text } = await fetchWithMetaRefresh(url);
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `HTTP ${response.status}`,
+        message: response.statusText
+      });
+    }
+
+    const contentType = response.headers.get('content-type') || 'text/html';
+    res.set('Content-Type', contentType);
+    res.send(text);
+
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({
+      error: 'Failed to fetch URL',
+      message: error.message
+    });
+  }
+});
+
 // Gemini API key validation endpoint
 app.post('/api/gemini/validate-key', async (req, res) => {
   const { apiKey } = req.body;
@@ -50,7 +123,7 @@ app.post('/api/gemini/validate-key', async (req, res) => {
 
   try {
     // Test with a minimal request to check if the key is valid
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -203,7 +276,7 @@ app.post('/api/gemini/generate-image', async (req, res) => {
     });
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key=${apiKey}`;
 
   try {
     const response = await fetch(url, {

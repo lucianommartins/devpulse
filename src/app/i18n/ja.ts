@@ -185,7 +185,7 @@ export const ja: LocaleStrings = {
 
   // ヘッダー
   header: {
-    poweredBy: 'Gemini 3.0 Flash 搭載',
+    poweredBy: 'Gemini 3.5 Flash 搭載',
     settings: '設定',
     contentCreated: '全ユーザーが作成したコンテンツ',
     contentsGenerated: 'コンテンツ生成',

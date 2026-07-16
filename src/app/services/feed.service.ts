@@ -46,14 +46,18 @@ export class FeedService {
    */
   private async loadFromFirestore(userId: string): Promise<void> {
     this.isLoading.set(true);
+    console.log(`[FeedService] Loading feeds from Firestore for user: ${userId}`);
 
     try {
       const feedsRef = collection(this.firestore, `users/${userId}/feeds`);
       const snapshot = await getDocs(feedsRef);
 
+      console.log(`[FeedService] Firestore snapshot: ${snapshot.docs.length} docs found`);
+
       const firestoreFeeds: Feed[] = [];
       snapshot.docs.forEach(docSnap => {
         const data = docSnap.data();
+        console.log(`[FeedService] Feed doc: ${docSnap.id} - ${data['name']}`);
         firestoreFeeds.push({
           id: docSnap.id,
           name: data['name'],
@@ -65,11 +69,18 @@ export class FeedService {
         });
       });
 
-      // Initialize default feeds if empty
-      if (firestoreFeeds.length === 0) {
+      // Check if user has ever been initialized (even if they deleted all feeds)
+      const hasBeenInitialized = await this.checkFeedsInitialized(userId);
+
+      // Initialize default feeds ONLY on first-ever login (never been initialized before)
+      if (firestoreFeeds.length === 0 && !hasBeenInitialized) {
+        console.log(`[FeedService] First-time user - initializing default feeds`);
         const defaultFeeds = await this.initializeDefaultFeeds(userId);
         this.feeds.set(defaultFeeds);
+        // Mark as initialized so defaults won't be added again
+        await this.markFeedsInitialized(userId);
       } else {
+        console.log(`[FeedService] Using ${firestoreFeeds.length} feeds from Firestore (already initialized: ${hasBeenInitialized})`);
         this.feeds.set(firestoreFeeds);
       }
 
@@ -82,6 +93,37 @@ export class FeedService {
       this.logger.error('FeedService', 'Failed to load from Firestore:', error);
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  /**
+   * Check if user has ever had feeds initialized
+   */
+  private async checkFeedsInitialized(userId: string): Promise<boolean> {
+    try {
+      const { getDoc } = await import('@angular/fire/firestore');
+      const settingsRef = doc(this.firestore, `users/${userId}/settings/feedPreferences`);
+      const snapshot = await getDoc(settingsRef);
+      if (snapshot.exists()) {
+        return snapshot.data()['feedsInitialized'] === true;
+      }
+      return false;
+    } catch (error) {
+      console.warn('[FeedService] Error checking feedsInitialized:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Mark that user has been initialized (so defaults won't be added again)
+   */
+  private async markFeedsInitialized(userId: string): Promise<void> {
+    try {
+      const settingsRef = doc(this.firestore, `users/${userId}/settings/feedPreferences`);
+      await setDoc(settingsRef, { feedsInitialized: true }, { merge: true });
+      console.log('[FeedService] Marked feedsInitialized = true');
+    } catch (error) {
+      console.warn('[FeedService] Error marking feedsInitialized:', error);
     }
   }
 

@@ -185,7 +185,7 @@ export const fr: LocaleStrings = {
 
   // En-tête
   header: {
-    poweredBy: 'Propulsé par Gemini 3.0 Flash',
+    poweredBy: 'Propulsé par Gemini 3.5 Flash',
     settings: 'Paramètres',
     contentCreated: 'Contenus créés par tous les utilisateurs',
     contentsGenerated: 'contenus générés',

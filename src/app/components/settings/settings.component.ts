@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { UserSettingsService, UserSettings } from '../../services/user-settings.service';
+import { SyncService } from '../../services/sync.service';
 import { I18nService, SupportedLocale } from '../../i18n';
 
 @Component({
@@ -66,6 +67,26 @@ import { I18nService, SupportedLocale } from '../../i18n';
               }
             </div>
           </div>
+
+          <div class="form-group">
+            <label>🗑️ Limpar Cache</label>
+            <button
+              class="btn btn-danger"
+              (click)="clearCache()"
+              [disabled]="isClearingCache()"
+            >
+              {{ isClearingCache() ? '...' : 'Limpar Cache de Items' }}
+            </button>
+            <p class="form-hint">
+              Remove todos os itens do cache. O contador de gerações será preservado.
+            </p>
+          </div>
+
+          @if (cacheCleared()) {
+          <div class="success-message">
+            ✅ Cache limpo com sucesso!
+          </div>
+          }
 
           @if (validationError()) {
           <div class="error-message">
@@ -317,6 +338,26 @@ import { I18nService, SupportedLocale } from '../../i18n';
     .language-option .lang-name {
       color: inherit;
     }
+
+    .btn-danger {
+      background: var(--color-error);
+      border: none;
+      color: white;
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-danger:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   `]
 })
 export class SettingsComponent {
@@ -331,6 +372,9 @@ export class SettingsComponent {
   saveSuccess = signal(false);
   validationError = signal<string | null>(null);
   isValidating = signal(false);
+  isClearingCache = signal(false);
+  cacheCleared = signal(false);
+  private syncService = inject(SyncService);
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
@@ -423,6 +467,20 @@ export class SettingsComponent {
       setTimeout(() => this.close.emit(), 1500);
     } catch (error) {
       // Error is handled by service
+    }
+  }
+
+  async clearCache(): Promise<void> {
+    this.isClearingCache.set(true);
+    this.cacheCleared.set(false);
+    try {
+      await this.syncService.clearCache();
+      this.cacheCleared.set(true);
+      setTimeout(() => this.cacheCleared.set(false), 3000);
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+    } finally {
+      this.isClearingCache.set(false);
     }
   }
 }
